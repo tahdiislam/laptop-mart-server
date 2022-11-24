@@ -49,6 +49,19 @@ async function run() {
     --------- All get Route --------
     --------------------------------- */
 
+    // give user access token
+    app.get("/jwt", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
+      if (!user) {
+        return res.status(401).message({ message: "unauthorized access" });
+      }
+      const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
