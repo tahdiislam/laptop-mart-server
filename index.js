@@ -99,7 +99,13 @@ async function run() {
 
     // post a new product
     app.post("/products", verifyJWT, verifySeller, async (req, res) => {
+      const email = req.decoded?.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
       const product = req.body;
+      product.userVerified = user.userVerified;
+      product.sellerName = user.name;
+      product.sellerEmail = email;
       const result = await Products.insertOne(product);
       res.send({ result });
     });
