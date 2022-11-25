@@ -37,8 +37,8 @@ const verifyJWT = (req, res, next) => {
       return res.status(403).send({ message: "forbidden access" });
     }
     req.decoded = decoded;
+    next();
   });
-  next();
 };
 
 async function run() {
@@ -69,7 +69,7 @@ async function run() {
 
     // verify seller
     const verifySeller = async (req, res, next) => {
-      const email = req.decoded.email;
+      const email = req.decoded?.email;
       const query = { email: email };
       const user = await Users.findOne(query);
       if (!user?.role === "seller") {
