@@ -67,6 +67,17 @@ async function run() {
       res.send({ token });
     });
 
+    // verify seller
+    const verifySeller = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
+      if (!user?.role === "seller") {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      next();
+    };
+
     // seller verification
     app.get("/seller", verifyJWT, async (req, res) => {
       const email = req.query.email;
@@ -87,7 +98,7 @@ async function run() {
     });
 
     // post a new product
-    app.post("/products", verifyJWT, async (req, res) => {
+    app.post("/products", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await Products.insertOne(product);
       res.send({ result });
