@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 // connect to database(mongoDb)
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.rgyxe1r.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -43,7 +43,11 @@ const verifyJWT = (req, res, next) => {
 
 async function run() {
   try {
+    // users collection
     const Users = client.db("laptopMart").collection("usersCollection");
+
+    // product collection
+    const Products = client.db("laptopMart").collection("productsCollection");
 
     /* ------------------------------
     --------- All get Route --------
@@ -62,6 +66,15 @@ async function run() {
       });
       res.send({ token });
     });
+
+    // seller verification
+    app.get("/seller", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
+      res.send({ isSeller: user?.role === "seller" ? true : false });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
@@ -70,6 +83,13 @@ async function run() {
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await Users.insertOne(user);
+      res.send({ result });
+    });
+
+    // post a new product
+    app.post("/products", verifyJWT, async (req, res) => {
+      const product = req.body;
+      const result = await Products.insertOne(product);
       res.send({ result });
     });
 
