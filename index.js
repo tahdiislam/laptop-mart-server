@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -84,6 +84,14 @@ async function run() {
       const query = { email: email };
       const user = await Users.findOne(query);
       res.send({ isSeller: user?.role === "seller" ? true : false });
+    });
+
+    // get all products
+    app.get("/products", verifyJWT, verifySeller, async (req, res) => {
+      const email = req.decoded.email;
+      const query = { sellerEmail: email };
+      const products = await Products.find(query).toArray();
+      res.send({ products });
     });
 
     /* ------------------------------
