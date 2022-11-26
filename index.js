@@ -78,6 +78,14 @@ async function run() {
       next();
     };
 
+    // admin verification
+    app.get("/admin", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" ? true : false });
+    });
+
     // seller verification
     app.get("/seller", verifyJWT, async (req, res) => {
       const email = req.query.email;
