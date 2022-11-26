@@ -173,6 +173,14 @@ async function run() {
       const result = await Products.deleteOne(query);
       res.send({ result });
     });
+
+    // delete user by admin
+    app.delete("/user/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Users.deleteOne(query);
+      res.send({ result });
+    });
   } finally {
   }
 }
