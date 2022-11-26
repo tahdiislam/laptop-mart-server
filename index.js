@@ -67,6 +67,17 @@ async function run() {
       res.send({ token });
     });
 
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded?.email;
+      const query = { email: email };
+      const user = await Users.findOne(query);
+      if (!user?.role === "admin") {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      next();
+    };
+
     // verify seller
     const verifySeller = async (req, res, next) => {
       const email = req.decoded?.email;
@@ -87,7 +98,7 @@ async function run() {
     });
 
     // get all sellers or buyers
-    app.get("/users", verifyJWT, async (req, res) => {
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const role = req.query.role;
       const query = { role: role };
       const result = await Users.find(query).toArray();
