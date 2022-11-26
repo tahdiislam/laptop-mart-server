@@ -49,6 +49,9 @@ async function run() {
     // product collection
     const Products = client.db("laptopMart").collection("productsCollection");
 
+    // category collection
+    const Category = client.db("laptopMart").collection("categoryCollection");
+
     /* ------------------------------
     --------- All get Route --------
     --------------------------------- */
@@ -142,6 +145,14 @@ async function run() {
       product.sellerName = user.name;
       product.sellerEmail = email;
       const result = await Products.insertOne(product);
+      res.send({ result });
+    });
+
+    // post category
+    app.post("/category", verifyJWT, verifyAdmin, async (req, res) => {
+      const category = req.body;
+      console.log(category);
+      const result = await Category.insertOne(category);
       res.send({ result });
     });
 
