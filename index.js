@@ -86,6 +86,14 @@ async function run() {
       res.send({ isAdmin: user?.role === "admin" ? true : false });
     });
 
+    // get all sellers or buyers
+    app.get("/users", verifyJWT, async (req, res) => {
+      const role = req.query.role;
+      const query = { role: role };
+      const result = await Users.find(query).toArray();
+      res.send({ result });
+    });
+
     // seller verification
     app.get("/seller", verifyJWT, async (req, res) => {
       const email = req.query.email;
