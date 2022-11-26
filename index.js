@@ -118,6 +118,23 @@ async function run() {
       res.send({ result });
     });
 
+    /* ------------------------------
+    --------- All Update method -----
+    --------------------------------- */
+
+    // advertise product
+    app.patch("/products/:id", verifyJWT, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const updateProperty = {
+        $set: {
+          advertise: true,
+        },
+      };
+      const result = await Products.updateOne(filter, updateProperty);
+      res.send({ result });
+    });
+
     /* -------------------------------
     --------- All Delete Route -------
     ---------------------------------- */
