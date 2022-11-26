@@ -124,6 +124,13 @@ async function run() {
       res.send({ products });
     });
 
+    // get all categories
+    app.get("/category", verifyJWT, async (req, res) => {
+      const query = {};
+      const result = await Category.find(query).toArray();
+      res.send({ result });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
@@ -151,7 +158,12 @@ async function run() {
     // post category
     app.post("/category", verifyJWT, verifyAdmin, async (req, res) => {
       const category = req.body;
-      console.log(category);
+      const categoryName = category.category;
+      const query = { category: categoryName };
+      const alreadyExisted = await Category.findOne(query);
+      if (alreadyExisted) {
+        return res.status(409).send({ message: "conflict request" });
+      }
       const result = await Category.insertOne(category);
       res.send({ result });
     });
