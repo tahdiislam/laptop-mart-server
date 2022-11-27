@@ -158,6 +158,14 @@ async function run() {
       res.send({ result });
     });
 
+    // get single booking
+    app.get("/bookings/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Booking.findOne(query);
+      res.send({ result });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
