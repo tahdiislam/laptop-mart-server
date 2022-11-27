@@ -124,11 +124,27 @@ async function run() {
       res.send({ products });
     });
 
+    app.get("/products", verifyJWT, async (req, res) => {
+      const query = {};
+      const products = await Products.find(query).toArray();
+      res.send({ products });
+    });
+
     // get all categories
-    app.get("/category", verifyJWT, async (req, res) => {
+    app.get("/category", async (req, res) => {
       const query = {};
       const result = await Category.find(query).toArray();
       res.send({ result });
+    });
+
+    // get singe brand product
+    app.get("/brand/:id", async (req, res) => {
+      const brandId = req.params.id;
+      const query = { categoryId: brandId };
+      const products = await Products.find(query).toArray();
+      const categoryQuery = { _id: ObjectId(brandId) };
+      const category = await Category.findOne(categoryQuery);
+      res.send({ category: category.category, products });
     });
 
     /* ------------------------------
