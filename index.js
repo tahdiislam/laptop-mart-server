@@ -52,6 +52,9 @@ async function run() {
     // category collection
     const Category = client.db("laptopMart").collection("categoryCollection");
 
+    // booking collection
+    const Booking = client.db("laptopMart").collection("bookingsCollection");
+
     /* ------------------------------
     --------- All get Route --------
     --------------------------------- */
@@ -138,7 +141,7 @@ async function run() {
     });
 
     // get singe brand product
-    app.get("/brand/:id", async (req, res) => {
+    app.get("/brand/:id", verifyJWT, async (req, res) => {
       const brandId = req.params.id;
       const query = { categoryId: brandId };
       const products = await Products.find(query).toArray();
@@ -181,6 +184,20 @@ async function run() {
         return res.status(409).send({ message: "conflict request" });
       }
       const result = await Category.insertOne(category);
+      res.send({ result });
+    });
+
+    // post booking
+    app.post("/bookings", verifyJWT, async (req, res) => {
+      const booking = req.body;
+      const buyerEmail = booking.buyerEmail;
+      const productId = booking.productId;
+      const query = { buyerEmail: buyerEmail, productId: productId };
+      const alreadyExisted = await Booking.findOne(query);
+      if (alreadyExisted) {
+        return res.status(409).send({ message: "conflict request" });
+      }
+      const result = await Booking.insertOne(booking);
       res.send({ result });
     });
 
