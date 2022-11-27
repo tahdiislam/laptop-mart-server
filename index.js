@@ -150,6 +150,14 @@ async function run() {
       res.send({ category: category.category, products });
     });
 
+    // get all booking by specific user
+    app.get("/bookings", verifyJWT, async (req, res) => {
+      const email = req.decoded.email;
+      const query = { buyerEmail: email };
+      const result = await Booking.find(query).toArray();
+      res.send({ result });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
@@ -235,6 +243,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await Users.deleteOne(query);
+      res.send({ result });
+    });
+
+    // delete booking
+    app.delete("/bookings/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Booking.deleteOne(query);
       res.send({ result });
     });
   } finally {
