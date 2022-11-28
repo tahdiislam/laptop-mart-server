@@ -190,6 +190,13 @@ async function run() {
       res.send({ result, updateProduct });
     });
 
+    // get advertise product
+    app.get("/product-add", async (req, res) => {
+      const query = { advertise: true, sold: false };
+      const result = await Products.find(query).toArray();
+      res.send({ result });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
