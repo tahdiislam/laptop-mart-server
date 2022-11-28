@@ -59,6 +59,9 @@ async function run() {
     // booking collection
     const Payments = client.db("laptopMart").collection("paymentsCollection");
 
+    // report collection
+    const Reports = client.db("laptopMart").collection("reportsCollection");
+
     /* ------------------------------
     --------- All get Route --------
     --------------------------------- */
@@ -147,7 +150,7 @@ async function run() {
     // get singe brand product
     app.get("/brand/:id", verifyJWT, async (req, res) => {
       const brandId = req.params.id;
-      const query = { categoryId: brandId };
+      const query = { categoryId: brandId, sold: false };
       const products = await Products.find(query).toArray();
       const categoryQuery = { _id: ObjectId(brandId) };
       const category = await Category.findOne(categoryQuery);
@@ -293,6 +296,19 @@ async function run() {
         bookingUpdateProperty
       );
       result.bookingUpdate = bookingUpdate;
+      res.send({ result });
+    });
+
+    // post report
+    app.post("/reports", verifyJWT, async (req, res) => {
+      const report = req.body;
+      const name = report.name;
+      const query = { name: name };
+      const alreadyExisted = await Reports.findOne(query);
+      if (alreadyExisted) {
+        return res.status(409).send({ message: "conflict access" });
+      }
+      const result = await Reports.insertOne(report);
       res.send({ result });
     });
 
