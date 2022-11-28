@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -54,6 +55,9 @@ async function run() {
 
     // booking collection
     const Booking = client.db("laptopMart").collection("bookingsCollection");
+
+    // booking collection
+    const Payments = client.db("laptopMart").collection("paymentsCollection");
 
     /* ------------------------------
     --------- All get Route --------
@@ -214,6 +218,54 @@ async function run() {
         return res.status(409).send({ message: "conflict request" });
       }
       const result = await Booking.insertOne(booking);
+      res.send({ result });
+    });
+
+    // stripe
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const booking = req.body;
+      const price = booking.price;
+      const amount = price * 100;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: amount,
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    // post successful payment
+    app.post("/payments/:id", verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const result = await Payments.insertOne(payment);
+      // update product
+      const id = req.params.id;
+      const productQuery = { _id: ObjectId(id) };
+      const productUpdateProperty = {
+        $set: {
+          sold: true,
+        },
+      };
+      const productUpdate = await Products.updateOne(
+        productQuery,
+        productUpdateProperty
+      );
+      result.productUpdate = productUpdate;
+      // update booking
+      const bookingQuery = { productId: id };
+      const bookingUpdateProperty = {
+        $set: {
+          paid: true,
+        },
+      };
+      const bookingUpdate = await Booking.updateOne(
+        bookingQuery,
+        bookingUpdateProperty
+      );
+      result.bookingUpdate = bookingUpdate;
       res.send({ result });
     });
 
