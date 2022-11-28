@@ -200,6 +200,13 @@ async function run() {
       res.send({ result });
     });
 
+    // get reported product
+    app.get("/reports", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = {};
+      const result = await Reports.find({}).toArray();
+      res.send({ result });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
