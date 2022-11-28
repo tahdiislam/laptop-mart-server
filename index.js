@@ -170,6 +170,26 @@ async function run() {
       res.send({ result });
     });
 
+    // verify user
+    app.get("/verify-user/:email", verifyJWT, verifyAdmin, async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const option = { upsert: true };
+      const updateProperty = {
+        $set: {
+          userVerified: true,
+        },
+      };
+      const result = await Users.updateOne(filter, updateProperty, option);
+      const productQuery = { sellerEmail: email };
+      const updateProduct = await Products.updateMany(
+        productQuery,
+        updateProperty,
+        option
+      );
+      res.send({ result, updateProduct });
+    });
+
     /* ------------------------------
     --------- All Post Route -------- 
     ---------------------------------*/
@@ -261,7 +281,7 @@ async function run() {
           paid: true,
         },
       };
-      const bookingUpdate = await Booking.updateOne(
+      const bookingUpdate = await Booking.updateMany(
         bookingQuery,
         bookingUpdateProperty
       );
