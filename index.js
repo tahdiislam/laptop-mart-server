@@ -203,8 +203,8 @@ async function run() {
     // get reported product
     app.get("/reports", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
-      const result = await Reports.find({}).toArray();
-      res.send({ result });
+      const products = await Reports.find(query).toArray();
+      res.send({ products });
     });
 
     /* ------------------------------
@@ -336,6 +336,18 @@ async function run() {
       res.send({ result });
     });
 
+    // put google user sign in user info
+    app.put("/user-google", async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const option = { upsert: true };
+      const updateproperty = {
+        $set: user,
+      };
+      const result = await Users.updateOne(filter, updateproperty, option);
+      res.send({ result });
+    });
+
     /* -------------------------------
     --------- All Delete Route -------
     ---------------------------------- */
@@ -347,6 +359,19 @@ async function run() {
       const result = await Products.deleteOne(query);
       res.send({ result });
     });
+
+    // delete product by admin
+    app.delete(
+      "/product-delete-admin/:id",
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await Products.deleteOne(query);
+        res.send({ result });
+      }
+    );
 
     // delete user by admin
     app.delete("/user/:id", verifyJWT, verifyAdmin, async (req, res) => {
@@ -361,6 +386,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await Booking.deleteOne(query);
+      res.send({ result });
+    });
+
+    // delete product by seller
+    app.delete("/reported-product/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Reports.deleteOne(query);
       res.send({ result });
     });
   } finally {
